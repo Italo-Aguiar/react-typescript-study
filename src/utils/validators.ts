@@ -1,17 +1,15 @@
-import { cpfMask } from "./masks";
-
-interface cpfResponse {
+interface Response {
   valid: boolean,
   message: string
 }
 
-export const cpfValidator = (maskedCpf: string): cpfResponse => {
-  const cpf = maskedCpf.replace(/\D/g, '').split('').map(d => parseInt(d));
+export const cpfValidator = (cpf: string): Response => {
+  const cpfArr = cpf.split('').map(d => parseInt(d));
 
   const verify = (max: number): boolean => {
     let sum = 0;
     
-    cpf.map((digit, i) => {
+    cpfArr.map((digit, i) => {
       if (i <= max - 2) {
         sum += digit * (max - i);
       }
@@ -19,10 +17,10 @@ export const cpfValidator = (maskedCpf: string): cpfResponse => {
 
     sum = sum * 10;
 
-    return sum % 11 == cpf[max-1] ? true : false
+    return sum % 11 == cpfArr[max-1] ? true : false
   }
 
-  return cpf.length == 11 && !cpf.every(v => v == cpf[0]) && verify(10) && verify(11)
+  return cpfArr.length == 11 && !cpfArr.every(v => v == cpfArr[0]) && verify(10) && verify(11)
     ? {
       valid: true,
       message: ''
@@ -31,4 +29,50 @@ export const cpfValidator = (maskedCpf: string): cpfResponse => {
       valid: false,
       message: 'Informe um CPF válido.'
     }
+}
+
+export const cepValidator = (cep: string): Response => {
+  if (cep.length == 8) {
+    return {
+      valid: true,
+      message: ''
+    }
+  }
+
+  return {
+    valid: false,
+    message: 'Informe um CEP válido.'
+  }
+}
+
+export const emailValidator = (email: string): Response => {
+  const re = /\S+@\S+\.\S+/;
+  
+  if (re.test(email)) {
+    return {
+      valid: true,
+      message: ''
+    }
+  }
+
+  return {
+    valid: false,
+    message: 'Informe um email válido.'
+  }
+}
+
+export const passwordValidator = (password: string): Response => {
+  const re = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,25}$/;
+
+  if (re.test(password)) {
+    return {
+      valid: true,
+      message: ''
+    }
+  }
+
+  return {
+    valid: false,
+    message: 'A senha deve ter pelo menos uma letra minúscula, uma maiúscula e um número, e ter de 6 a 25 caracteres.'
+  }
 }

@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TextField, Button } from '@material-ui/core';
-import { FormProps } from '../../utils';
+import { unmask, cepMask, FormProps, cepValidator } from '../../utils';
 
-const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
+const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
+  const [cep, setCep] = useState('');
+  const [addr, setAddr] = useState('');
+  const [num, setNum] = useState('');
+  const [comp, setComp] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [errors, setErrors] = useState({
+    cep: {
+      valid: true,
+      message: ''
+    }
+  });
+  
   return (
     <form onSubmit={ event => {
       event.preventDefault();
-      onSubmit();
+      onSubmit({ shipping: { cep, addr, num, comp, city, state } });
     }}>
 
-      {/*TODO: implementar mascara e mensagem de erro para o cep*/}
       <TextField
+        value={cepMask(cep)}
+        onChange={
+          (event) => {
+            const unmaskedCep = unmask(event.target.value)
+            setCep(unmaskedCep);
+
+            if (!errors.cep.valid) {
+              setErrors({ ...errors, cep: cepValidator(unmaskedCep) });
+            }
+          }
+        }
+        onBlur={(_) => setErrors({ ...errors, cep: cepValidator(cep) })}
+        error={!errors.cep.valid}
+        helperText={errors.cep.message}
         id="cep"
         label="CEP"
-        type="number"
+        type="text"
         variant="outlined"
         margin="normal"
         required
@@ -21,6 +47,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
         autoFocus
       />
       <TextField
+        value={addr}
+        onChange={(event) => setAddr(event.target.value)}
         id="endereco"
         label="Endereço"
         type="text"
@@ -31,6 +59,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
       />
 
       <TextField
+        value={num}
+        onChange={(event) => setNum(event.target.value)}
         id="numero"
         label="Número"
         type="text"
@@ -39,6 +69,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
         style={{marginRight: '20px'}}
       />
       <TextField
+        value={comp}
+        onChange={(event) => setComp(event.target.value)}
         id="complemento"
         label="Complemento"
         type="text"
@@ -47,6 +79,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
       />
 
       <TextField
+        value={city}
+        onChange={(event) => setCity(event.target.value)}
         id="cidade"
         label="Cidade"
         type="text"
@@ -56,6 +90,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
         required
       />
       <TextField
+        value={state}
+        onChange={(event) => setState(event.target.value)}
         id="estado"
         label="Estado"
         type="text"
@@ -63,8 +99,8 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit }) => {
         margin="normal"
         required
       />
-
-      <Button variant="contained" color="primary" type="submit">Voltar</Button>
+      <br />
+      <Button variant="contained" color="primary" type="submit" style={{ marginRight: '20px' }} onClick={onBack}>Voltar</Button>
       <Button variant="contained" color="primary" type="submit">Finalizar Cadastro</Button>
 
     </form>

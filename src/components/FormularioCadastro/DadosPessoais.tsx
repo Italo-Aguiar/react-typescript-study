@@ -2,23 +2,15 @@ import React, { useState } from 'react';
 import {
   Button, TextField, Switch, FormControlLabel, Container
 } from '@material-ui/core';
-import { cpfMask, cpfValidator, FormProps } from '../../utils';
+import { unmask, cpfMask, cpfValidator, FormProps } from '../../utils';
 
-const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
+const DadosPessoais: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
   const [cpf, setCpf] = useState('');
   const [promo, setPromo] = useState(true);
   const [news, setNews] = useState(true);
   const [errors, setErrors] = useState({
-    nome: {
-      valid: true,
-      message: ''
-    },
-    sobrenome: {
-      valid: true,
-      message: ''
-    },
     cpf: {
       valid: true,
       message: ''
@@ -29,7 +21,7 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
     <form onSubmit={
       (event) => {
         event.preventDefault();
-        onSubmit();
+        onSubmit({ personalInfo: { nome, sobrenome, cpf, promo, news } });
       }
     }>
 
@@ -55,13 +47,14 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
         fullWidth
       />
       <TextField
-        value={cpf}
+        value={cpfMask(cpf)}
         onChange={
           (event) => {
-            setCpf(cpfMask(event.target.value));
+            const unmaskedCpf = unmask(event.target.value)
+            setCpf(unmaskedCpf);
             
             if (!errors.cpf.valid) {
-              setErrors({ ...errors, cpf: cpfValidator(cpfMask(event.target.value)) });
+              setErrors({ ...errors, cpf: cpfValidator(unmaskedCpf) });
             }
           }
         }
@@ -100,7 +93,7 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
           label="Novidades"
         />
 
-        <Button variant="contained" color="primary" type="button" style={{ marginRight: '20px' }}>Voltar</Button>
+        <Button variant="contained" color="primary" type="button" style={{ marginRight: '20px' }} onClick={onBack}>Voltar</Button>
         <Button variant="contained" color="primary" type="submit">Próximo</Button>
       </Container>
 

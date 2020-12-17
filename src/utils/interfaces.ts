@@ -1,3 +1,4 @@
 export interface FormProps {
-  onSubmit(data?: object): void
+  onSubmit (data: object): void,
+  onBack?: () => void
 }
