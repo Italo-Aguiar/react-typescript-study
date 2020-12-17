@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Button, TextField, Switch, FormControlLabel,
+  Button, TextField, Switch, FormControlLabel, Container
 } from '@material-ui/core';
-import { cpfMask, cpfValidator } from '../../utils/index';
-
-interface FormProps {
-  onSubmit(obj: object): any
-}
+import { cpfMask, cpfValidator, FormProps } from '../../utils';
 
 const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
   const [nome, setNome] = useState('');
@@ -33,9 +29,7 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
     <form onSubmit={
       (event) => {
         event.preventDefault();
-        onSubmit({
-          nome, sobrenome, cpf, promo, news,
-        });
+        onSubmit();
       }
     }>
 
@@ -46,6 +40,7 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
         label="Nome"
         variant="outlined"
         margin="normal"
+        required
         fullWidth
         autoFocus
       />
@@ -56,6 +51,7 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
         label="Sobrenome"
         variant="outlined"
         margin="normal"
+        required
         fullWidth
       />
       <TextField
@@ -63,6 +59,10 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
         onChange={
           (event) => {
             setCpf(cpfMask(event.target.value));
+            
+            if (!errors.cpf.valid) {
+              setErrors({ ...errors, cpf: cpfValidator(cpfMask(event.target.value)) });
+            }
           }
         }
         onBlur={(_) => setErrors({ ...errors, cpf: cpfValidator(cpf) })}
@@ -72,33 +72,37 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit }: FormProps) => {
         label="CPF"
         variant="outlined"
         margin="normal"
+        required
         fullWidth
       />
 
-      <FormControlLabel
-        control={(
-          <Switch
-            onChange={(event) => setPromo(event.target.checked)}
-            name="promocoes"
-            color="primary"
-            checked={promo}
-          />
-        )}
-        label="Promoções"
-      />
-      <FormControlLabel
-        control={(
-          <Switch
-            onChange={(event) => setNews(event.target.checked)}
-            name="novidades"
-            color="primary"
-            checked={news}
-          />
-        )}
-        label="Novidades"
-      />
+      <Container style={{ display: 'flex', justifyContent: 'center' }}>
+        <FormControlLabel
+          control={(
+            <Switch
+              onChange={(event) => setPromo(event.target.checked)}
+              name="promocoes"
+              color="primary"
+              checked={promo}
+            />
+          )}
+          label="Promoções"
+        />
+        <FormControlLabel
+          control={(
+            <Switch
+              onChange={(event) => setNews(event.target.checked)}
+              name="novidades"
+              color="primary"
+              checked={news}
+            />
+          )}
+          label="Novidades"
+        />
 
-      <Button variant="contained" color="primary" type="submit">Cadastrar</Button>
+        <Button variant="contained" color="primary" type="button" style={{ marginRight: '20px' }}>Voltar</Button>
+        <Button variant="contained" color="primary" type="submit">Próximo</Button>
+      </Container>
 
     </form>
   );

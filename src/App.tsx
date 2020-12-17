@@ -5,7 +5,7 @@ import FormularioCadastro from './components/FormularioCadastro';
 import './App.css';
 
 const App: React.FC = () => (
-  <Container maxWidth="sm" component="article">
+  <Container maxWidth="sm" component="article" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '70%', width: '100%' }}>
     <Typography component="h1" variant="h3" align="center">Formulário de Cadastro</Typography>
     <FormularioCadastro />
   </Container>
