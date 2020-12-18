@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Button, TextField } from '@material-ui/core';
-import { FormProps, emailValidator, passwordValidator } from '../../utils';
+import { FormProps, emailValidator, passwordValidator, ObjectIndex } from '../../utils';
+import { ValidacoesContext } from '../../contexts';
 
 
 const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<ObjectIndex>({
     email: {
       valid: true,
       message: ''
@@ -17,10 +18,35 @@ const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
     }
   });
 
+  const { validacoes } = useContext(ValidacoesContext);
+
+  const validate = (
+    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const { name, value } = event.target;
+    let newErrors = {...errors}
+    newErrors[name] = validacoes[name](value);
+    setErrors(newErrors);
+  }
+
+  const submittable = (): boolean => {
+    let canSubmit = true;
+
+    Object.values(errors).map(value => {
+      if (!value.valid) {
+        canSubmit = false;
+      }
+    })
+
+    return canSubmit;
+  }
+
   return (
     <form onSubmit={ event => {
       event.preventDefault();
-      onSubmit({ userData: { email, password } });
+      if (submittable()) {
+        onSubmit({ userData: { email, password } });
+      }
     }}>
 
       <TextField
@@ -31,14 +57,15 @@ const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
             setEmail(temp)
 
             if (!errors.email.valid) {
-              setErrors({ ...errors, email: emailValidator(temp) })
+              validate(event);
             }
           }
         }
-        onBlur={(_) => setErrors({ ...errors, email: emailValidator(email) })}
+        onBlur={(event) => validate(event)}
         error={!errors.email.valid}
         helperText={errors.email.message}
         id="email"
+        name="email"
         label="Email"
         type="email"
         variant="outlined"
@@ -63,6 +90,7 @@ const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
         error={!errors.password.valid}
         helperText={errors.password.message}
         id="senha"
+        name="password"
         label="Senha"
         type="password"
         variant="outlined"

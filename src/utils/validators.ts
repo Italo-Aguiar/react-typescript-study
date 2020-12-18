@@ -1,9 +1,6 @@
-interface Response {
-  valid: boolean,
-  message: string
-}
+import { ValidatorResponse } from './interfaces';
 
-export const cpfValidator = (cpf: string): Response => {
+export const cpfValidator = (cpf: string): ValidatorResponse => {
   const cpfArr = cpf.split('').map(d => parseInt(d));
 
   const verify = (max: number): boolean => {
@@ -31,7 +28,7 @@ export const cpfValidator = (cpf: string): Response => {
     }
 }
 
-export const cepValidator = (cep: string): Response => {
+export const cepValidator = (cep: string): ValidatorResponse => {
   if (cep.length == 8) {
     return {
       valid: true,
@@ -45,7 +42,7 @@ export const cepValidator = (cep: string): Response => {
   }
 }
 
-export const emailValidator = (email: string): Response => {
+export const emailValidator = (email: string): ValidatorResponse => {
   const re = /\S+@\S+\.\S+/;
   
   if (re.test(email)) {
@@ -61,7 +58,7 @@ export const emailValidator = (email: string): Response => {
   }
 }
 
-export const passwordValidator = (password: string): Response => {
+export const passwordValidator = (password: string): ValidatorResponse => {
   const re = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{6,25}$/;
 
   if (re.test(password)) {

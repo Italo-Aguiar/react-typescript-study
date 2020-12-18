@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { TextField, Button } from '@material-ui/core';
-import { unmask, cepMask, FormProps, cepValidator } from '../../utils';
+import { unmask, cepMask, FormProps, ObjectIndex } from '../../utils';
+import { ValidacoesContext } from '../../contexts';
 
 const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [cep, setCep] = useState('');
@@ -9,17 +10,42 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [comp, setComp] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<ObjectIndex>({
     cep: {
       valid: true,
       message: ''
     }
   });
+
+  const { validacoes } = useContext(ValidacoesContext);
+
+  const validate = (
+    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const { name, value } = event.target;
+    let newErrors = {...errors}
+    newErrors[name] = validacoes[name](unmask(value));
+    setErrors(newErrors);
+  }
+
+  const submittable = (): boolean => {
+    let canSubmit = true;
+
+    Object.values(errors).map(value => {
+      if (!value.valid) {
+        canSubmit = false;
+      }
+    })
+
+    return canSubmit;
+  }
   
   return (
     <form onSubmit={ event => {
       event.preventDefault();
-      onSubmit({ shipping: { cep, addr, num, comp, city, state } });
+      if (submittable()) {
+        onSubmit({ shipping: { cep, addr, num, comp, city, state } });
+      }
     }}>
 
       <TextField
@@ -30,14 +56,15 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
             setCep(unmaskedCep);
 
             if (!errors.cep.valid) {
-              setErrors({ ...errors, cep: cepValidator(unmaskedCep) });
+              validate(event)
             }
           }
         }
-        onBlur={(_) => setErrors({ ...errors, cep: cepValidator(cep) })}
+        onBlur={(event) => validate(event)}
         error={!errors.cep.valid}
         helperText={errors.cep.message}
         id="cep"
+        name="cep"
         label="CEP"
         type="text"
         variant="outlined"
@@ -100,7 +127,7 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
         required
       />
       <br />
-      <Button variant="contained" color="primary" type="submit" style={{ marginRight: '20px' }} onClick={onBack}>Voltar</Button>
+      <Button variant="contained" color="primary" type="button" style={{ marginRight: '20px' }} onClick={onBack}>Voltar</Button>
       <Button variant="contained" color="primary" type="submit">Finalizar Cadastro</Button>
 
     </form>

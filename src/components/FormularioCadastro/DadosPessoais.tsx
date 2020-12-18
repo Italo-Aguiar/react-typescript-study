@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
-  Button, TextField, Switch, FormControlLabel, Container
+  Button, TextField, Switch, FormControlLabel, Container, useControlled
 } from '@material-ui/core';
-import { unmask, cpfMask, cpfValidator, FormProps } from '../../utils';
+import { unmask, cpfMask, cpfValidator, FormProps, ObjectIndex } from '../../utils';
+import { ValidacoesContext } from '../../contexts';
+
 
 const DadosPessoais: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [nome, setNome] = useState('');
@@ -10,18 +12,43 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [cpf, setCpf] = useState('');
   const [promo, setPromo] = useState(true);
   const [news, setNews] = useState(true);
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<ObjectIndex>({
     cpf: {
       valid: true,
       message: ''
     }
   });
 
+  const { validacoes } = useContext(ValidacoesContext);
+
+  const validate = (
+    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const { name, value } = event.target;
+    let newErrors = {...errors}
+    newErrors[name] = validacoes[name](unmask(value));
+    setErrors(newErrors);
+  }
+
+  const submittable = (): boolean => {
+    let canSubmit = true;
+
+    Object.values(errors).map(value => {
+      if (!value.valid) {
+        canSubmit = false;
+      }
+    })
+
+    return canSubmit;
+  }
+
   return (
     <form onSubmit={
       (event) => {
         event.preventDefault();
-        onSubmit({ personalInfo: { nome, sobrenome, cpf, promo, news } });
+        if (submittable()) {
+          onSubmit({ personalInfo: { nome, sobrenome, cpf, promo, news } });
+        }
       }
     }>
 
@@ -54,14 +81,15 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit, onBack }) => {
             setCpf(unmaskedCpf);
             
             if (!errors.cpf.valid) {
-              setErrors({ ...errors, cpf: cpfValidator(unmaskedCpf) });
+              validate(event);
             }
           }
         }
-        onBlur={(_) => setErrors({ ...errors, cpf: cpfValidator(cpf) })}
+        onBlur={(event) => validate(event)}
         error={!errors.cpf.valid}
         helperText={errors.cpf.message}
         id="cpf"
+        name="cpf"
         label="CPF"
         variant="outlined"
         margin="normal"
