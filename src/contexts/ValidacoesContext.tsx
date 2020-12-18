@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import { cepValidator, cpfValidator, emailValidator, passwordValidator, ValidatorResponse } from '../utils';
 
-interface ValidacoesProps {
+export interface ValidacoesProps {
   validacoes: {
     [key: string]: any;
 

@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
+import { useErrors } from '../../hooks/useError';
 import {
   Button, TextField, Switch, FormControlLabel, Container, useControlled
 } from '@material-ui/core';
-import { unmask, cpfMask, cpfValidator, FormProps, ObjectIndex } from '../../utils';
+import { unmask, cpfMask, FormProps, ObjectIndex } from '../../utils';
 import { ValidacoesContext } from '../../contexts';
 
 
@@ -12,35 +13,9 @@ const DadosPessoais: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [cpf, setCpf] = useState('');
   const [promo, setPromo] = useState(true);
   const [news, setNews] = useState(true);
-  const [errors, setErrors] = useState<ObjectIndex>({
-    cpf: {
-      valid: true,
-      message: ''
-    }
-  });
-
-  const { validacoes } = useContext(ValidacoesContext);
-
-  const validate = (
-    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
-    let newErrors = {...errors}
-    newErrors[name] = validacoes[name](unmask(value));
-    setErrors(newErrors);
-  }
-
-  const submittable = (): boolean => {
-    let canSubmit = true;
-
-    Object.values(errors).map(value => {
-      if (!value.valid) {
-        canSubmit = false;
-      }
-    })
-
-    return canSubmit;
-  }
+  
+  const validacoes = useContext(ValidacoesContext);
+  const { errors, validate, submittable } = useErrors(validacoes)
 
   return (
     <form onSubmit={

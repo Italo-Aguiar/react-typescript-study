@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
+import { useErrors } from '../../hooks/useError';
 import { TextField, Button } from '@material-ui/core';
-import { unmask, cepMask, FormProps, ObjectIndex } from '../../utils';
+import { unmask, cepMask, FormProps } from '../../utils';
 import { ValidacoesContext } from '../../contexts';
 
 const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
@@ -10,36 +11,10 @@ const DadosEntrega: React.FC<FormProps> = ({ onSubmit, onBack }) => {
   const [comp, setComp] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
-  const [errors, setErrors] = useState<ObjectIndex>({
-    cep: {
-      valid: true,
-      message: ''
-    }
-  });
-
-  const { validacoes } = useContext(ValidacoesContext);
-
-  const validate = (
-    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
-    let newErrors = {...errors}
-    newErrors[name] = validacoes[name](unmask(value));
-    setErrors(newErrors);
-  }
-
-  const submittable = (): boolean => {
-    let canSubmit = true;
-
-    Object.values(errors).map(value => {
-      if (!value.valid) {
-        canSubmit = false;
-      }
-    })
-
-    return canSubmit;
-  }
   
+  const validacoes = useContext(ValidacoesContext);
+  const { errors, validate, submittable } = useErrors(validacoes);
+
   return (
     <form onSubmit={ event => {
       event.preventDefault();

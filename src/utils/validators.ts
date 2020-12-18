@@ -1,7 +1,7 @@
 import { ValidatorResponse } from './interfaces';
 
 export const cpfValidator = (cpf: string): ValidatorResponse => {
-  const cpfArr = cpf.split('').map(d => parseInt(d));
+  const cpfArr = cpf.replace(/\D/g, '').split('').map(d => parseInt(d));
 
   const verify = (max: number): boolean => {
     let sum = 0;
@@ -29,6 +29,8 @@ export const cpfValidator = (cpf: string): ValidatorResponse => {
 }
 
 export const cepValidator = (cep: string): ValidatorResponse => {
+  cep = cep.replace(/\D/g, '');
+  
   if (cep.length == 8) {
     return {
       valid: true,

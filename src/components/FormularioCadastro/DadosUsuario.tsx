@@ -2,44 +2,15 @@ import React, { useState, useContext } from 'react';
 import { Button, TextField } from '@material-ui/core';
 import { FormProps, emailValidator, passwordValidator, ObjectIndex } from '../../utils';
 import { ValidacoesContext } from '../../contexts';
+import { useErrors } from '../../hooks/useError';
 
 
 const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<ObjectIndex>({
-    email: {
-      valid: true,
-      message: ''
-    },
-    password: {
-      valid: true,
-      message: ''
-    }
-  });
-
-  const { validacoes } = useContext(ValidacoesContext);
-
-  const validate = (
-    event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const { name, value } = event.target;
-    let newErrors = {...errors}
-    newErrors[name] = validacoes[name](value);
-    setErrors(newErrors);
-  }
-
-  const submittable = (): boolean => {
-    let canSubmit = true;
-
-    Object.values(errors).map(value => {
-      if (!value.valid) {
-        canSubmit = false;
-      }
-    })
-
-    return canSubmit;
-  }
+  
+  const validacoes = useContext(ValidacoesContext);
+  const { errors, validate, submittable } = useErrors(validacoes);
 
   return (
     <form onSubmit={ event => {
@@ -82,11 +53,11 @@ const DadosUsuario: React.FC<FormProps> = ({ onSubmit }) => {
             setPassword(temp);
 
             if (!errors.password.valid) {
-              setErrors({ ...errors, password: passwordValidator(temp) })
+              validate(event)
             }
           }
         }
-        onBlur={(_) => setErrors({ ...errors, password: passwordValidator(password) })}
+        onBlur={(event) => validate(event)}
         error={!errors.password.valid}
         helperText={errors.password.message}
         id="senha"
